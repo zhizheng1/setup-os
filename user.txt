@@ -1,0 +1,18 @@
+* ~/.local/etc/zprofile
+export PATH=~/.local/bin:$PATH
+export MANPATH=~/.local/share/man:$MANPATH
+export LD_LIBRARY_PATH=~/.local/lib:$LD_LIBRARY_PATH
+
+* fonts
+ln -sf /System/Library/Fonts/Supplemental/Arial* ~/.local/share/fonts
+echo '<fontconfig><dir>~/.local/share/fonts</dir><selectfont><rejectfont><glob>/System/*</glob><glob>/Library/*</glob></rejectfont></selectfont></fontconfig>' >~/.local/etc/fonts/fonts.conf
+
+echo "export FONTCONFIG_PATH=~/.local/etc/fonts" >>~/.local/etc/zprofile
+
+* nc_proc
+coproc sh -i 2>&1; nc -klU proc.sock <&p >&p
+
+stty raw -echo;nc -U proc.sock;stty sane
+stty rows <rows> cols <cols>
+echo "\e[8;$LINES;${COLUMNS}t"
+python3 -c "import pty; pty.spawn('$SHELL')"

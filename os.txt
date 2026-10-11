@@ -1,0 +1,63 @@
+init_unx
+--------
+apt remove --purge snapd # remove all snap apps
+apt-mark auto \*
+apt install linux-image-generic-hwe-$LTS_VER openssh-server zip unzip avahi-daemon bind9-dnsutils curl ed fdisk iproute2 iputils-ping lshw lsof netcat-openbsd netplan.io rsync sudo tcpdump time [wpasupplicant] xfsprogs
+
+rm /etc/apt/apt.conf.d/20apt-esm-hook.conf
+chmod -x /etc/update-motd.d/*
+
+apt install samba cifs-utils apache2
+systemctl disable smbd
+systemctl disable apache2
+
+# release upgrade
+# apt install ubuntu-standard update-manager-core
+
+rm -rf /usr/local/*
+echo 'PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"' >/etc/environment
+
+echo LANG=en_US.UTF-8 >/etc/default/locale
+timedatectl list-timezones
+timedatectl set-timezone $TIMEZONE
+
+useradd -m -d /home/user user
+passwd user
+usermod -a -G sudo user
+
+dd if=/dev/zero of=/swap.img bs=1024 count=4M
+chmod 0600 /swap.img
+mkswap /swap.img
+echo "/swap.img none swap sw 0 0" >>/etc/fstab
+
+POSIX
+-----
+# CLTools
+SDK/include: pcre2/src/pcre2{.h[.generic] posix.h} xz/src/liblzma/api/lzma* libressl/include/openssl
+SDK/lib: tapi stubify --filetype=tbd-v4 libressl/lib{ssl crypto}.dylib
+
+apt install --no-install-recommends build-essential [gcc g++ make] gdb git libncurses-dev libreadline-dev libxml2-dev libcurl4-openssl-dev zlib1g-dev libbz2-dev libffi-dev uuid-dev libsqlite3-dev libexpat1-dev libicu-dev libpcre2-dev liblzma-dev libssl-dev libgdbm-dev libgdbm-compat-dev indent linux-headers-generic-hwe-$LTS_VER manpages-dev
+
+# ctags
+jansson libyaml; unx: libjansson-dev libyaml-dev libseccomp-dev
+
+# python3
+tcltk: --prefix=$CLTools/usr; unx: --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu
+openssl@3 zstd; unx: libzstd-dev
+--enable-framework=$CLTools/Library/Frameworks --with-framework-name=Python3; unx: --enable-shared, DESTSHARED: [BIN]LIBDEST
+
+cmds_u
+------
+# zsh
+--prefix=/usr --enable-multibyte --enable-unicode9 --enable-max-function-depth=700 --enable-pcre
+cp ~/etc_zshrc /etc/zshrc
+
+# nano
+cd bin; mv pico.alpine pico; ln -sf pico nano
+cd ../share/man/man1; mv pico.alpine.1.gz pico.1.gz; ln -sf pico.1.gz nano.1.gz
+cd ../..; rm -rf doc
+
+# vim
+--prefix=/usr --with-features=normal --enable-gui=no --with-x=no --enable-cscope --enable-terminal --disable-selinux --disable-nls --disable-xattr --disable-socketserver --with-tlib=ncurses --with-compiledby=root@linux
+echo "#define FEAT_CSCOPE 1" >>src/auto/config.h
+ln -sf vim bin/vi; ln -sf vim.1 share/man/man1/vi.1

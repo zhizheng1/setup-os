@@ -1,0 +1,66 @@
+# local.service-001.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>local.service-001</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/local/bin/service-001</string>
+		<string>--start</string>
+	</array>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>WorkingDirectory</key>
+	<string>/Users/user</string>
+	<key>StandardOutPath</key>
+	<string>/Users/user/Library/Logs/local.service-001/out.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/user/Library/Logs/local.service-001/err.log</string>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+</dict>
+</plist>
+
+# service-001.service
+[Unit]
+Description=Service 001
+After=network.target
+
+[Service]
+Type=simple
+Environment="PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+ExecStart=/usr/local/bin/service-001 --start
+WorkingDirectory=/home/user
+Restart=always
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+
+# /etc/apache2/other/proxy-8000.conf
+Listen 8000
+
+<VirtualHost *:8000>
+    ProxyRequests Off
+    ProxyPreserveHost On
+
+    RewriteEngine On
+    #RewriteRule ^/proxy/([0-9]+)/(.*)$ http://localhost:$1/$2 [P,L]
+    RewriteCond %{HTTP:Upgrade} websocket [NC]
+    RewriteCond %{HTTP:Connection} upgrade [NC]
+    RewriteRule ^/?(.*) unix:/var/tmp/proxy/server-8000|ws://localhost/$1 [P,L,QSA]
+
+    ProxyPass / unix:/var/tmp/proxy/server-8000|http://localhost/
+    ProxyPassReverse / unix:/var/tmp/proxy/server-8000|http://localhost/
+</VirtualHost>
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server.local.key -out server.local.crt -subj "/CN=server.local" -addext "subjectAltName=DNS:server.local"
