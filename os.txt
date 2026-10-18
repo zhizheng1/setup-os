@@ -33,17 +33,13 @@ echo "/swap.img none swap sw 0 0" >>/etc/fstab
 POSIX
 -----
 # CLTools
-SDK/include: pcre2/src/pcre2{.h[.generic] posix.h} xz/src/liblzma/api/lzma* libressl/include/openssl
-SDK/lib: tapi stubify --filetype=tbd-v4 libressl/lib{ssl crypto}.dylib
+SDK/include: pcre2/src/pcre2{.h[.generic] posix.h} xz/src/liblzma/api/lzma*
 
-apt install --no-install-recommends build-essential [gcc g++ make] gdb git libncurses-dev libreadline-dev libxml2-dev libcurl4-openssl-dev zlib1g-dev libbz2-dev libffi-dev uuid-dev libsqlite3-dev libexpat1-dev libicu-dev libpcre2-dev liblzma-dev libssl-dev libgdbm-dev libgdbm-compat-dev indent linux-headers-generic-hwe-$LTS_VER manpages-dev
-
-# ctags
-jansson libyaml; unx: libjansson-dev libyaml-dev libseccomp-dev
+apt install --no-install-recommends build-essential [gcc g++ make] gdb git libncurses-dev libreadline-dev libxml2-dev libcurl4-openssl-dev zlib1g-dev libbz2-dev libffi-dev uuid-dev libsqlite3-dev libexpat1-dev libicu-dev libpcre2-dev liblzma-dev libgdbm-dev libgdbm-compat-dev indent linux-headers-generic-hwe-$LTS_VER manpages-dev
 
 # python3
 tcltk: --prefix=$CLTools/usr; unx: --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu
-openssl@3 zstd; unx: libzstd-dev
+openssl@3 zstd mpdecimal; unx: libssl-dev libzstd-dev libmpdec-dev
 --enable-framework=$CLTools/Library/Frameworks --with-framework-name=Python3; unx: --enable-shared, DESTSHARED: [BIN]LIBDEST
 
 cmds_u
