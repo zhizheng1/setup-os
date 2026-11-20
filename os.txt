@@ -30,20 +30,18 @@ chmod 0600 /swap.img
 mkswap /swap.img
 echo "/swap.img none swap sw 0 0" >>/etc/fstab
 
+printf 'Defaults !secure_path\nDefaults env_keep += "PATH"\n' | sudo tee /etc/sudoers.d/keep-path && sudo chmod 0440 /etc/sudoers.d/keep-path
+
 POSIX
 -----
 # CLTools
-SDK/include: pcre2/src/pcre2{.h[.generic] posix.h} xz/src/liblzma/api/lzma* libressl/include/openssl
-SDK/lib: tapi stubify --filetype=tbd-v4 libressl/lib{ssl crypto}.dylib
+SDK/include: pcre2/src/pcre2{.h[.generic] posix.h} xz/src/liblzma/api/lzma*
 
-apt install --no-install-recommends build-essential [gcc g++ make] gdb git libncurses-dev libreadline-dev libxml2-dev libcurl4-openssl-dev zlib1g-dev libbz2-dev libffi-dev uuid-dev libsqlite3-dev libexpat1-dev libicu-dev libpcre2-dev liblzma-dev libssl-dev libgdbm-dev libgdbm-compat-dev indent linux-headers-generic-hwe-$LTS_VER manpages-dev
-
-# ctags
-jansson libyaml; unx: libjansson-dev libyaml-dev libseccomp-dev
+apt install --no-install-recommends build-essential [gcc g++ make] gdb git libncurses-dev libreadline-dev libxml2-dev libcurl4-openssl-dev zlib1g-dev libbz2-dev libffi-dev uuid-dev libsqlite3-dev libexpat1-dev libicu-dev libpcre2-dev liblzma-dev libgdbm-dev libgdbm-compat-dev libpam0g-dev flex bison libseccomp-dev exuberant-ctags indent linux-headers-generic-hwe-$LTS_VER manpages-dev
 
 # python3
 tcltk: --prefix=$CLTools/usr; unx: --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu
-openssl@3 zstd; unx: libzstd-dev
+openssl@3 zstd mpdecimal; unx: libssl-dev libzstd-dev libmpdec-dev
 --enable-framework=$CLTools/Library/Frameworks --with-framework-name=Python3; unx: --enable-shared, DESTSHARED: [BIN]LIBDEST
 
 cmds_u
@@ -52,12 +50,9 @@ cmds_u
 --prefix=/usr --enable-multibyte --enable-unicode9 --enable-max-function-depth=700 --enable-pcre
 cp ~/etc_zshrc /etc/zshrc
 
-# nano
-cd bin; mv pico.alpine pico; ln -sf pico nano
-cd ../share/man/man1; mv pico.alpine.1.gz pico.1.gz; ln -sf pico.1.gz nano.1.gz
-cd ../..; rm -rf doc
-
 # vim
 --prefix=/usr --with-features=normal --enable-gui=no --with-x=no --enable-cscope --enable-terminal --disable-selinux --disable-nls --disable-xattr --disable-socketserver --with-tlib=ncurses --with-compiledby=root@linux
 echo "#define FEAT_CSCOPE 1" >>src/auto/config.h
 ln -sf vim bin/vi; ln -sf vim.1 share/man/man1/vi.1
+alpine-pico/{bin share/man} (pico.alpine -> pico -> nano) libhunspell-1.7-0/lib less
+mac: printf 'unlet! skip_defaults_vim\nsource $VIMRUNTIME/defaults.vim\nset modelines&vim\nset backspace&vim\nset regexpengine=0\n' >~/.vimrc
